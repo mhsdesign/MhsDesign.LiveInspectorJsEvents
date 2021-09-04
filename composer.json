@@ -1,0 +1,14 @@
+{
+    "description": "Send JsEvents to the iframe on Inspector changes",
+    "type": "neos-package",
+    "name": "mhsdesign/liveinspectorjsevents",
+    "license": "GPL-3.0+",
+    "require": {
+        "neos/neos-ui": "^5.0 || ^7.0"
+    },
+    "extra": {
+        "neos": {
+            "package-key": "MhsDesign.LiveInspectorJsEvents"
+        }
+    }
+}

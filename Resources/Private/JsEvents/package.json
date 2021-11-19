@@ -1,7 +1,7 @@
 {
     "description": "MhsDesign.LiveInspectorJsEvents",
     "scripts": {
-      "build": "neos-react-scripts build",
+      "build": "NODE_ENV=production neos-react-scripts build",
       "watch": "neos-react-scripts watch"
     },
     "devDependencies": {

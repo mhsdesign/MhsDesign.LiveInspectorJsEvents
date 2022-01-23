@@ -70,17 +70,18 @@ your js:
 // all changers will be registered here:
 const changer = {}
 changer['MhsDesign.LiveInspectorDemo:Content.Spacer'] = (node, property) => {
+    const {name, updated, previous} = property;
     /** type HTMLElement */
     const el = neos.guestFrame.findElementByNode(node);
-    switch (property.name) {
+    switch (name) {
         case 'height':
             // sometimes the ui wraps an div around the html - sometimes not.
             const spacerDiv = querySelectClosest(el, '.spacer')
-            if (property.previous !== '') {
-                spacerDiv.classList.remove(property.previous)
+            if (previous !== '') {
+                spacerDiv.classList.remove(previous)
             }
-            if (property.updated !== '') {
-                spacerDiv.classList.add(property.updated)
+            if (updated !== '') {
+                spacerDiv.classList.add(updated)
             }
     }
 }
@@ -90,6 +91,7 @@ const updateNode = (node, property) => {
     if (typeof changer[node.nodeType] !== "undefined") {
         changer[node.nodeType](node, property);
     }
+    // alternative:
     // switch (node.nodeType) {
     //     case 'MhsDesign.LiveInspectorDemo:Content.Spacer':
     //         changeSpacer(node, property)

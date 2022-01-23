@@ -2,11 +2,14 @@
 
 ## Neos Ui Plugin for Inspector change events in the iframe.
 
+### Demo 
+https://user-images.githubusercontent.com/85400359/150694045-375e3e79-0a9e-4d92-864e-f873a053b1a4.mp4
+
 ### Usage
 
 install:
 ```
-composer require mhsdesign/liveinspectorjsevents
+composer require "mhsdesign/liveinspectorjsevents:~2.0.0"
 ```
 
 ### listen to the events (in the iframe):

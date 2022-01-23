@@ -5,7 +5,7 @@
       "watch": "neos-react-scripts watch"
     },
     "devDependencies": {
-      "@neos-project/neos-ui-extensibility": "^7.1"
+      "@neos-project/neos-ui-extensibility": "^7.2"
     },
     "neos": {
       "buildTargetDirectory": "../../Public/JsEvents"

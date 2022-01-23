@@ -4,7 +4,7 @@
     "name": "mhsdesign/liveinspectorjsevents",
     "license": "GPL-3.0+",
     "require": {
-        "neos/neos-ui": "^5.0 || ^7.0"
+        "neos/neos-ui": "^7.2.0"
     },
     "extra": {
         "neos": {

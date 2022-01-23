@@ -1,81 +1,66 @@
-import {takeLatest, select} from 'redux-saga/effects'
+import {takeLatest} from 'redux-saga/effects'
 import {actionTypes, selectors} from '@neos-project/neos-ui-redux-store'
+// https://github.com/neos/neos-ui/blob/7ede460ec1bb8dd4455fc636b875c137d112e89d/packages/neos-ui-guest-frame/src/dom.js#L313
+import {dispatchCustomEvent} from '@neos-project/neos-ui-guest-frame'
 
-import {filterOutPropertiesWithUnderscore} from './helpers'
-// TODO: use consumer api soon: https://github.com/neos/neos-ui/pull/2945
-import {dispatchCustomEvent} from './neos-ui-guest-frame'
+// cache of all pending changes of the current edited node.
+// will be updated on commit event - and flushed on discard.
+// https://github.com/neos/neos-ui/blob/7ede460ec1bb8dd4455fc636b875c137d112e89d/packages/neos-ui-redux-store/src/UI/Inspector/selectors.ts#L15
+// https://github.com/neos/neos-ui/blob/7ede460ec1bb8dd4455fc636b875c137d112e89d/packages/neos-ui-redux-store/src/UI/Inspector/index.ts#L91
+let lastTransientValues = {};
 
-export default function* onNodeChangeSendEvent() {
+export default function* onNodeChangeSendEvent({store}) {
 
-    // COMMIT happens on every subtle change in the inspector.
+    // COMMIT happens on every subtle change in the inspector. (sometimes even when the previousValue === newValue)
     yield takeLatest(actionTypes.UI.Inspector.COMMIT, function* (action) {
+        const {focusedNode, propertyId, value} = action.payload;
 
-        // alternative
-        // const state = yield select();
-        // const node = selectors.CR.Nodes.focusedSelector(state)
+        const previousValue = typeof lastTransientValues[propertyId] !== "undefined"
+            ? lastTransientValues[propertyId].value
+            : focusedNode.properties[propertyId]
 
-        const node = action.payload.focusedNode
+        if (previousValue === value) {
+            // does happen
+            // fx. when re-selecting the same option from a select box
+            return
+        }
 
-        const changedNodeProperty = {}
-        changedNodeProperty[action.payload.propertyId] = action.payload.value
+        const updatedProperty = {
+            name: propertyId,
+            updated: value,
+            previous: previousValue
+        }
 
-        dispatchCustomEvent('MhsDesign.LiveInspectorJsEvents', 'COMMIT', {
-            node: node,
-            properties: changedNodeProperty
+        dispatchCustomEvent('Neos.NodeCommit', 'New property value of node was committed.', {
+            node: focusedNode,
+            property: updatedProperty
         })
+
+        // update cache
+        const state = store.getState();
+        lastTransientValues = selectors.UI.Inspector.transientValues(state);
     })
 
     // DISCARD happens when you dont apply the changes.
     yield takeLatest(actionTypes.UI.Inspector.DISCARD, function* (action) {
+        const {focusedNodeContextPath} = action.payload;
 
-        const state = yield select();
-        const node = selectors.CR.Nodes.nodeByContextPath(state)(action.payload.focusedNodeContextPath)
+        const state = store.getState();
+        const focusedNode = selectors.CR.Nodes.nodeByContextPath(state)(focusedNodeContextPath)
 
-        dispatchCustomEvent('MhsDesign.LiveInspectorJsEvents', 'DISCARD', {
-            node: node,
-            properties: filterOutPropertiesWithUnderscore(node.properties)
+        const updatedProperties = Object.entries(lastTransientValues).map(([propertyIdToBeReset, propertyUnchangedValueToBeReset]) => {
+            return {
+                name: propertyIdToBeReset,
+                updated: focusedNode.properties[propertyIdToBeReset],
+                previous: propertyUnchangedValueToBeReset.value
+            }
+        })
+        // flush cache
+        lastTransientValues = {};
+
+        dispatchCustomEvent('Neos.NodeDiscard', 'Previously changed properties of node were reset.', {
+            node: focusedNode,
+            properties: updatedProperties
         })
     })
 }
-
-
-/*
-
-make sure you have the Redux DevTools installed:
-https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=de
-
-The API from Neos.
-
-node = {
-    "identifier": "99257f0c-70f0-405b-a82b-fa8e375c23fb",
-    ...
-    "properties": {
-        "_creationDateTime": "2021-08-22T18:58:21+00:00",
-        "_path": "/sites/root/main/node-l461lxh2i1a77",
-        "_name": "node-l461lxh2i1a77",
-        "_nodeType": "Vendor.Site:Content.Heading",
-        ...
-        "title": "my String old"
-}
-
-commitAction = {
-    "type": "@neos/neos-ui/UI/Inspector/COMMIT",
-    "payload": {
-        "propertyId": "title",
-        "value": "my String",
-        ...
-        "focusedNode": node, // we get something like in the node above
-        }
-    }
-}
-
-discardAction = {
-    "type": "@neos/neos-ui/UI/Inspector/DISCARD",
-    "payload": {
-        "focusedNodeContextPath": "/sites/root/main/node-l461lxh2i1a77@user-mhs"
-        // we can get all the node details from the CR via:
-        // selectors.CR.Nodes.nodeByContextPath(state)(focusedNodeContextPath)
-    }
-}
-
-*/

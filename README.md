@@ -19,8 +19,8 @@ document.addEventListener('Neos.NodeCommit', (event) => {
     // {name: 'title', updated: 'abcd', previous: 'abc'}
     console.log(property);
 
-    // see below:
-    console.log(getDomElementForNode(node))
+    // experimental: see below:
+    console.log(neos.guestFrame.findElementByNode(node));
 })
 
 
@@ -48,23 +48,28 @@ node = {
 }
 ```
 
-### You can get the dom node of the corresponding node via:
+### Get the dom element of the corresponding node:
 
-> !!! Be carefully, I don't know if this is meant to be used.
-> 
-> Or if one would rely too much on internals.
-> 
-> Solution would be to export certain functions of neos-ui-guest-frame/src/dom.js to the iframe, which I decided not to do yet.
+> The following functionality or way of handling this is experimental, and could eventually change.
 
-### `getDomElementForNode(node)`
+the global `window.neos` object is extended by this package and exposes under `guestFrame` this function, which makes it possible to get the dom element by node object:
 ```js
-const getDomElementForNode = (node) => {
+neos.guestFrame.findElementByNode(node)
+```
+
+
+Under the hood it does something like:
+(*But try to avoid using the following snippet directly as it uses eventually purely internal knowledge.*)
+
+```js
+const findElementByNode = (node) => {
     const {contextPath} = node;
     // https://github.com/neos/neos-ui/blob/7ede460ec1bb8dd4455fc636b875c137d112e89d/packages/neos-ui-guest-frame/src/dom.js#L76
     return  document.querySelector(`[data-__neos-node-contextpath="${contextPath}"]`);
 }
 ```
 
+--------
 
 ### More dev notes (about internals, not so much about the events above):
 

@@ -1,11 +1,12 @@
 {
     "description": "MhsDesign.LiveInspectorJsEvents",
     "scripts": {
-      "build": "NODE_ENV=production neos-react-scripts build",
-      "watch": "neos-react-scripts watch"
+        "build": "node build.js",
+        "watch": "node build.js --watch"
     },
     "devDependencies": {
-      "@neos-project/neos-ui-extensibility": "^7.2"
+      "@neos-project/neos-ui-extensibility": "^8.0",
+      "esbuild": "^0.17.0"
     },
     "neos": {
       "buildTargetDirectory": "../../Public/JsEvents"

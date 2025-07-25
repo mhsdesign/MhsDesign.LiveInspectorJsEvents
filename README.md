@@ -33,24 +33,24 @@ your yaml:
       label: 'Settings'
   properties:
     height:
-    type: string
-    ui:
-      # not need to explicitly state it since its the default:
-      # reloadIfChanged: false
-      label: 'Height'
-      inspector:
-      group: settings
-      editor: 'Neos.Neos/Inspector/Editors/SelectBoxEditor'
-      editorOptions:
-        allowEmpty: true
-        values:
-          # your css classes as key.
-          height-sm:
-            label: 'Small'
-          height-md:
-            label: 'Medium'
-          height-lg:
-            label: 'Large'
+      type: string
+      ui:
+        # not need to explicitly state it since its the default:
+        # reloadIfChanged: false
+        label: 'Height'
+        inspector:
+        group: settings
+        editor: 'Neos.Neos/Inspector/Editors/SelectBoxEditor'
+        editorOptions:
+          allowEmpty: true
+          values:
+            # your css classes as key.
+            height-sm:
+              label: 'Small'
+            height-md:
+              label: 'Medium'
+            height-lg:
+              label: 'Large'
 ```
 
 </details>
